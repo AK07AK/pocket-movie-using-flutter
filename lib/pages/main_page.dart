@@ -1,130 +1,251 @@
 import 'dart:ui';
 
-//packages
+//Packages
+import 'package:untitled1/models/main_page_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pocket_movie/controllers/main_page_data_controller.dart';
-import 'package:pocket_movie/model/main_page_data.dart';
+import 'package:untitled1/models/main_page_data.dart';
 
-
-//models
-import '../model/movie.dart';
-//widgets
-import '../widgets/topbar.dart';
+//Widgets
 import '../widgets/movie_tile.dart';
 
+//Models
+import '../models/search_category.dart';
+import '../models/movie.dart';
+
+//Controllers
+import '../controllers/main_page_data_controller.dart';
 
 final mainPageDataControllerProvider =
-StateNotifierProvider<MainPageDataController>((ref) {
+    StateNotifierProvider<MainPageDataController, MainPageData>((ref) {
   return MainPageDataController();
 });
 
-class MainPage extends ConsumerWidget{
-  late double devicesHeight;
-  late double devicesWidth;
+final selectedMoviePosterURLProvider = StateProvider<String?>((ref) {
+  final movies = ref.watch(mainPageDataControllerProvider).movies!;
+  return movies.isNotEmpty ? movies[0].posterURL() : null;
+});
 
-  late MainPageDataController mainPageDataController;
-  late MainPageData mainPageData;
+class MainPage extends ConsumerWidget {
+  double? _deviceHeight;
+  double? _deviceWidth;
+
+  late var _selectedMoviePosterURL;
+
+  late MainPageDataController _mainPageDataController;
+  late MainPageData _mainPageData;
+
+  TextEditingController? _searchTextFieldController;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    devicesHeight = MediaQuery.of(context).size.height;
-    devicesWidth = MediaQuery.of(context).size.width;
-    mainPageDataController = ref.watch(mainPageDataControllerProvider);
+    _deviceHeight = MediaQuery.of(context).size.height;
+    _deviceWidth = MediaQuery.of(context).size.width;
+
+    _mainPageDataController = ref.watch(mainPageDataControllerProvider.notifier);
+    _mainPageData = ref.watch(mainPageDataControllerProvider);
+    _selectedMoviePosterURL = ref.watch(selectedMoviePosterURLProvider);
+
+    _searchTextFieldController = TextEditingController();
+
+    _searchTextFieldController!.text = _mainPageData.searchText!;
+
     return _buildUI();
   }
-  Widget _buildUI(){
+
+  Widget _buildUI() {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.black,
-      body: SizedBox(
-        height:devicesHeight ,
-        width:devicesWidth,
+      body: Container(
+        height: _deviceHeight,
+        width: _deviceWidth,
         child: Stack(
           alignment: Alignment.center,
           children: [
-            background(),
-            foregroundWidget(),
+            _backgroundWidget(),
+            _foregroundWidgets(),
           ],
         ),
       ),
     );
   }
-  Widget background(){
-    return Container(
-      height: devicesHeight,
-      width: devicesWidth,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10.0),
-      image: const DecorationImage(image: NetworkImage('https://i.pinimg.com/236x/27/1d/97/271d9775390e2256c59e80fadbfca7b0.jpg'),
-          fit:BoxFit.cover,
-    )
-      ),
-      child: BackdropFilter(
-        filter:ImageFilter.blur(sigmaX:15.0,sigmaY:15.0),
-        child: Container(
-          decoration: BoxDecoration(color:Colors.black.withOpacity(0.2))
+
+  Widget _backgroundWidget() {
+    if (_selectedMoviePosterURL != null) {
+      return Container(
+        height: _deviceHeight,
+        width: _deviceWidth,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0),
+          image: DecorationImage(
+            image: NetworkImage(_selectedMoviePosterURL),
+            fit: BoxFit.cover,
+          ),
         ),
-      ),
-    );
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15.0, sigmaY: 15.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.2),
+            ),
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        height: _deviceHeight,
+        width: _deviceWidth,
+        color: Colors.black,
+      );
+    }
   }
-  Widget foregroundWidget(){
+
+  Widget _foregroundWidgets() {
     return Container(
-        padding: EdgeInsets.fromLTRB(0, devicesHeight*0.01, 0, 0),
-      width: devicesWidth*0.88,
-      child:Column(
+      padding: EdgeInsets.fromLTRB(0, _deviceHeight! * 0.02, 0, 0),
+      width: _deviceWidth! * 0.98,
+      child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          topBar(),
+          _topBarWidget(),
           Container(
-            height: devicesHeight*0.80,
-            padding: EdgeInsets.symmetric(vertical: devicesHeight*0.01),
-            child: moviesListViewWidget(),
+            height: _deviceHeight! * 0.83,
+            padding: EdgeInsets.symmetric(vertical: _deviceHeight! * 0.01),
+            child: _moviesListViewWidget(),
           )
         ],
       ),
     );
   }
-  Widget moviesListViewWidget(){
-    final List<Movie> _movies = [];
-    for(var i =0;i<20;i++)
-      {
-        _movies.add(Movie(
-          name: 'The dark Knight',
-          lang: 'EN',
-          isAdult: false,
-          description: "The plot follows the vigilante Batman, police lieutenant James Gordon, and district attorney Harvey Dent, who form an alliance to dismantle organized crime in Gotham City",
-          posterPath:'https://i.pinimg.com/564x/9e/f1/e9/9ef1e9d622ba4225c4ee193c2c17e665.jpg' ,
-          backdropPath: 'https://i.pinimg.com/564x/9e/f1/e9/9ef1e9d622ba4225c4ee193c2c17e665.jpg',
-          rating: 8.2,
-          releaseDate: "18 July 2008"
-        ));
-      }
-    if(_movies.isNotEmpty)
-    {
-        return ListView.builder(
-          itemCount: _movies.length,
-          itemBuilder:(BuildContext context,int index)
-          {
-            return Padding(padding: EdgeInsets.symmetric(vertical: devicesHeight*0.01,horizontal: 0),
-            child: GestureDetector(
-              onTap: (){},
-              child: MovieTile(
-                movie:_movies[index],
-                height:devicesHeight*0.20,
-                width: devicesWidth*0.85,),
 
-            ) ,
+  Widget _topBarWidget() {
+    return Container(
+      height: _deviceHeight! * 0.08,
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _searchFieldWidget(),
+          _categorySelectionWidget(),
+        ],
+      ),
+    );
+  }
+
+  Widget _searchFieldWidget() {
+    final border = InputBorder.none;
+    return Container(
+      width: _deviceWidth! * 0.50,
+      height: _deviceHeight! * 0.05,
+      child: TextField(
+        controller: _searchTextFieldController,
+        onSubmitted: (input) =>
+            _mainPageDataController.updateTextSearch(input),
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+            focusedBorder: border,
+            border: border,
+            prefixIcon: const Icon(Icons.search, color: Colors.white24),
+            hintStyle: const TextStyle(color: Colors.white54),
+            filled: false,
+            fillColor: Colors.white24,
+            hintText: 'Search....'),
+      ),
+    );
+  }
+
+  Widget _categorySelectionWidget() {
+    return DropdownButton(
+      dropdownColor: Colors.black38,
+      value: _mainPageData.searchCategory,
+      icon: const Icon(
+        Icons.menu,
+        color: Colors.white24,
+      ),
+      underline: Container(
+        height: 1,
+        color: Colors.white24,
+      ),
+      onChanged: (dynamic value) => value.toString().isNotEmpty
+          ? _mainPageDataController.updateSearchCategory(value)
+          : null,
+      items: [
+        DropdownMenuItem(
+          value: SearchCategory.popular,
+          child: Text(
+            SearchCategory.popular,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+        DropdownMenuItem(
+          value: SearchCategory.upcoming,
+          child: Text(
+            SearchCategory.upcoming,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+        DropdownMenuItem(
+          value: SearchCategory.none,
+          child: Text(
+            SearchCategory.none,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _moviesListViewWidget() {
+    final List<Movie> movies = _mainPageData.movies!;
+
+    if (movies.isNotEmpty) {
+      return NotificationListener(
+        onNotification: (dynamic onScrollNotification) {
+          if (onScrollNotification is ScrollEndNotification) {
+            final before = onScrollNotification.metrics.extentBefore;
+            final max = onScrollNotification.metrics.maxScrollExtent;
+            if (before == max) {
+              _mainPageDataController.getMovies();
+              return true;
+            }
+            return false;
+          }
+          return false;
+        },
+        child: ListView.builder(
+          itemCount: movies.length,
+          itemBuilder: (BuildContext context, int count) {
+            return Padding(
+              padding: EdgeInsets.symmetric(
+                  vertical: _deviceHeight! * 0.01, horizontal: 0),
+              child: GestureDetector(
+                onTap: () {
+                  _selectedMoviePosterURL.state = movies[count].posterURL();
+                },
+                child: MovieTile(
+                  movie: movies[count],
+                  height: _deviceHeight! * 0.20,
+                  width: _deviceWidth! * 0.85,
+                ),
+              ),
             );
           },
-        );
-    }
-    else{
+        ),
+      );
+    } else {
       return const Center(
-        child: CircularProgressIndicator(backgroundColor: Colors.white,),
+        child: CircularProgressIndicator(
+          backgroundColor: Colors.white,
+        ),
       );
     }
   }
-
-
 }

@@ -1,5 +1,5 @@
 import 'package:get_it/get_it.dart';
-import 'package:pocket_movie/model/app_config.dart';
+import 'package:untitled1/model/app_config.dart';
 
 class Movie{
   final String name;
@@ -22,22 +22,22 @@ class Movie{
     required this.releaseDate
 });
 
-  factory Movie.fromJson(Map<String,dynamic> _json)
+  factory Movie.fromJson(Map<String,dynamic> json)
   {
     return Movie(
-      name:_json['title'],
-      lang: _json['original_lang'],
-      isAdult: _json['adult'],
-      description: _json['overview'],
-      posterPath: _json['poster_path'],
-      backdropPath: _json['backdrop_path'],
-      rating: _json['vote_average'],
-      releaseDate: _json['release_date'],
+      name:json['title'],
+      lang: json['original_lang'],
+      isAdult: json['adult'],
+      description: json['overview'],
+      posterPath: json['poster_path'],
+      backdropPath: json['backdrop_path'],
+      rating: json['vote_average'],
+      releaseDate: json['release_date'],
     );
   }
   String posterUrl()
   {
     final AppConfig appConfig = GetIt.instance.get<AppConfig>();
-    return '$appConfig.BASE_IMAGE_API_URL)$posterPath';
+    return '${appConfig.BASE_IMAGE_API_URL}$posterPath';
   }
 }

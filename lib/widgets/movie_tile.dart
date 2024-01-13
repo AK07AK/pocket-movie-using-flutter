@@ -1,80 +1,99 @@
-//packages
-import'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+
+//Packages
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-//models
-import '../model/movie.dart';
-class MovieTile extends StatelessWidget {
+//Models
+import '../models/movie.dart';
 
-  final GetIt getIt = GetIt.instance;
-  final double height;
-  final double width;
-  final Movie movie;
-  MovieTile({super.key,required this.height,required this.width,required this.movie});
+class MovieTile extends StatelessWidget {
+  final GetIt _getIt = GetIt.instance;
+
+  final double? height;
+  final double? width;
+  final Movie? movie;
+
+  MovieTile({this.movie, this.height, this.width});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
-      width: width,
+    return Container(
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _moviePosterWidget(movie.posterUrl()),
+          _moviePosterWidget(movie!.posterURL()),
           _movieInfoWidget(),
         ],
       ),
     );
   }
-  Widget _movieInfoWidget()
-  {
-    return SizedBox(
+
+  Widget _movieInfoWidget() {
+    return Container(
       height: height,
-      width: width*0.66,
-      child:  Column(
+      width: width! * 0.80,
+      child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Container(
+                width: width! * 0.56,
+                child: Text(
+                  movie!.name!,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w400),
+                ),
+              ),
               Text(
-                movie.name,
-            overflow:TextOverflow.ellipsis,
-            style:const TextStyle(color:Colors.white,fontSize: 22,fontWeight: FontWeight.w400) ,
-            ),
-              Text(movie.rating.toString(),style: const TextStyle(color:Colors.white,fontSize: 22),),
+                movie!.rating.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                ),
+              ),
             ],
           ),
           Container(
-            padding:EdgeInsets.fromLTRB(0, height*0.02, 0, 0),
+            padding: EdgeInsets.fromLTRB(0, height! * 0.02, 0, 0),
             child: Text(
-              '${movie.lang.toUpperCase()} | R: ${movie.isAdult} | ${movie.releaseDate}',
-              style: const TextStyle(color:Colors.white,fontSize: 10,),
-
+              '${movie!.language!.toUpperCase()} | R: ${movie!.isAdult} | ${movie!.releaseDate}',
+              style: const TextStyle(color: Colors.white, fontSize: 10),
             ),
           ),
           Container(
-            padding:EdgeInsets.fromLTRB(0, height*0.07, 0, 0),
-            child: Text(movie.description,maxLines: 9,overflow: TextOverflow.ellipsis,style: const TextStyle(color:Colors.white70,fontWeight: FontWeight.w400,fontSize: 15),),
-          )
+            padding: EdgeInsets.fromLTRB(0, height! * 0.07, 5, 0),
+            child: Text(
+              movie!.description!,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white70, fontSize: 10),
+            ),
+          ),
         ],
-
       ),
     );
   }
-  Widget _moviePosterWidget(String posterURL)
-  {
+
+  Widget _moviePosterWidget(String _imageUrl) {
     return Container(
       height: height,
-      width: width*0.35,
-      decoration: const BoxDecoration(
-        image: DecorationImage(image: NetworkImage('https://i.pinimg.com/564x/9e/f1/e9/9ef1e9d622ba4225c4ee193c2c17e665.jpg'))
+      width: width! * 0.35,
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: NetworkImage(_imageUrl),
+        ),
       ),
     );
   }

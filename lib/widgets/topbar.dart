@@ -37,9 +37,9 @@ class topBar extends StatelessWidget {
      icon: const Icon(Icons.menu,color: Colors.white24,),
      underline: Container(height: 1,color:Colors.white24),
      onChanged: (_value){},
-     items: [
-       DropdownMenuItem(value:SearchCategory.popular ,child: Text(SearchCategory.popular,style: const TextStyle(color:Colors.white),),),
-       DropdownMenuItem(value:SearchCategory.upComing, child: Text(SearchCategory.upComing,style: const TextStyle(color:Colors.white),) ),
+     items: const [
+       DropdownMenuItem(value:SearchCategory.popular ,child: Text(SearchCategory.popular,style: TextStyle(color:Colors.white),),),
+       DropdownMenuItem(value:SearchCategory.upComing, child: Text(SearchCategory.upComing,style: TextStyle(color:Colors.white),) ),
 
      ],
 
